@@ -6,7 +6,7 @@ import requests
 from dotenv import load_dotenv
 
 load_dotenv()
-TOKEN = os.getenv("token")
+TOKEN = os.getenv("TOKEN")
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -26,11 +26,14 @@ def get_price(symbol):
             coin_id = coin["id"]
             break
 
-    response = requests.get(
-        f"https://api.coingecko.com/api/v3/simple/price?ids={coin_id}&vs_currencies=usd",
-        {},
-    )
-    data = response.json()
+    try:
+        response = requests.get(
+            f"https://api.coingecko.com/api/v3/simple/price?ids={coin_id}&vs_currencies=usd",
+            {},
+        )
+        data = response.json()
+    except UnboundLocalError:
+        return None
 
     return data[coin_id]["usd"]
 
@@ -53,6 +56,7 @@ async def on_message(message):
 
         if len(parts) < 2:
             await message.channel.send("Please provide a symbol")
+            return
 
         symbol = parts[1]
 
